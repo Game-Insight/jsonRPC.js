@@ -314,14 +314,14 @@
 				for (id in this._objects) {
 					if (this._objects.hasOwnProperty(id)) {
 						responses.push({
-							               'jsonrpc': this._objects[id]._request.jsonrpc,
-							               'id': id,
-							               'error': {
-								               'code': errorCode,
-								               'message': 'Parse error occurred.',
-								               'data': null
-							               }
-						               });
+							'jsonrpc': batch._objects[id]._request.jsonrpc,
+							'id': id,
+							'error': {
+								'code': errorCode,
+								'message': 'Parse error occurred.',
+								'data': null
+							}
+						});
 					}
 				}
 
@@ -330,9 +330,9 @@
 				for (id in this._objects) {
 					if (this._objects.hasOwnProperty(id)) {
 						responses.push({
-							               'id': id,
-							               'message': 'Http error occured.'
-						               });
+							'id': id,
+							'message': 'Http error occured.'
+						});
 					}
 				}
 
@@ -354,14 +354,14 @@
 						}
 						if (!responseExists) {
 							responses.push({
-								               'jsonrpc': this._objects[id]._request.jsonrpc,
-								               'id': id,
-								               'error': {
-									               'code': -32001,
-									               'message': 'This request didn`t got response.',
-									               'data': null
-								               }
-							               });
+								'jsonrpc': batch._objects[id]._request.jsonrpc,
+								'id': id,
+								'error': {
+									'code': -32001,
+									'message': 'This request didn`t got response.',
+									'data': null
+								}
+							});
 						}
 					}
 				}
