@@ -1,4 +1,6 @@
 (function (window) {
+	var requestId = 1;
+
 	/**
 	 * Request class
 	 *
@@ -33,9 +35,7 @@
 			this._request.params = data;
 		}
 		if (!this._isNotification) {
-			// TODO: should I use system that excepts collapses of ids?
-			// TODO: maybe I should do it only in a JsonRPCBatch class?
-			this._request.id = Math.round(Math.random() * 1000000000);
+			this._request.id = requestId++;
 		}
 
 		return this;
