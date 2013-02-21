@@ -116,18 +116,18 @@
 	JsonRPCRequest.prototype.execute = function() {
 		doRequest(this._url, this._authUserName, this._authPassword, this._request, (function(requestInstance) {
 			return function(response) {
-				requestInstance.handleResponse(response.code, response.message);
+				handleRequestResponse(requestInstance, response.code, response.message);
 			}
 		})(this));
 	};
 
-	JsonRPCRequest.prototype.handleResponse = function(responseCode, responseMessage) {
-		if (responseCode == 200 && responseMessage == '' && this._isNotification) {
+	function handleRequestResponse (request, responseCode, responseMessage) {
+		if (responseCode == 200 && responseMessage == '' && request._isNotification) {
 			return;
 		}
 
 		if (responseCode == 200 && responseMessage.hasOwnProperty('result')) {
-			this.successHandler(responseMessage.result);
+			request.successHandler(responseMessage.result);
 		} else if (responseCode != 200 || responseMessage.hasOwnProperty('error')) {
 			var exception = {};
 			if (responseCode != 200) {
@@ -137,13 +137,13 @@
 				exception = responseMessage.error;
 			}
 
-			this.exceptionHandler(exception);
+			request.exceptionHandler(exception);
 		} else {
 			throw 'The JSON RPC response "' + JSON.stringify({code: responseCode, message: responseMessage}) + '" hasn`t properties "result" and "error".';
 		}
 
-		this.completeHandler();
-	};
+		request.completeHandler();
+	}
 
 
 	/**
@@ -228,18 +228,18 @@
 	JsonRPCBatch.prototype.execute = function() {
 		doRequest(this._url, this._authUserName, this._authPassword, this._requests, (function(batchInstance) {
 			return function(response) {
-				batchInstance.handleResponse(response.code, response.message);
+				handleBatchResponse(batchInstance, response.code, response.message);
 			}
 		})(this));
 	};
 
-	JsonRPCBatch.prototype.handleResponse = function(responseCode, responseMessage) {
+	function handleBatchResponse(batch, responseCode, responseMessage) {
 		var errorCode;
 		var id;
 		var index;
 		if (responseCode == 200) {
 			// Each request in the batch was sent as notification
-			if (responseMessage == '' && Object.keys(this._objects).length == 0) {
+			if (responseMessage == '' && Object.keys(batch._objects).length == 0) {
 				return;
 			} else if (responseMessage == '') {
 				// Server returned empty response. Object or Array was expected
@@ -250,8 +250,8 @@
 			} else if (responseMessage instanceof Array) {
 				var isErrorExists = false;
 				// Check responseMessage for all requests have a response
-				for (id in this._objects) {
-					if (this._objects.hasOwnProperty(id)) {
+				for (id in batch._objects) {
+					if (batch._objects.hasOwnProperty(id)) {
 						var isResponseExists = false;
 						for (index in responseMessage) {
 							if (responseMessage.hasOwnProperty(index) && responseMessage[index].hasOwnProperty('id') && responseMessage[index].id == id) {
@@ -286,7 +286,7 @@
 					// Parse error
 					errorCode = responseMessage.error.code;
 				} else {
-					if (Object.keys(this._objects).length > 1) {
+					if (Object.keys(batch._objects).length > 1) {
 						errorCode = -32001; // Response for some request wasn`t returned
 					}
 
@@ -301,7 +301,7 @@
 			errorCode = responseCode;
 		}
 
-		if (errorCode != undefined && !this.exceptionHandler({code: errorCode, message: responseMessage})) {
+		if (errorCode != undefined && !batch.exceptionHandler({code: errorCode, message: responseMessage})) {
 			return;
 		}
 
@@ -311,8 +311,8 @@
 		} else {
 			// Parse error
 			if (errorCode == -32700) {
-				for (id in this._objects) {
-					if (this._objects.hasOwnProperty(id)) {
+				for (id in batch._objects) {
+					if (batch._objects.hasOwnProperty(id)) {
 						responses.push({
 							'jsonrpc': batch._objects[id]._request.jsonrpc,
 							'id': id,
@@ -327,8 +327,8 @@
 
 				// HTTP error occurred
 			} else if (errorCode > -32000) {
-				for (id in this._objects) {
-					if (this._objects.hasOwnProperty(id)) {
+				for (id in batch._objects) {
+					if (batch._objects.hasOwnProperty(id)) {
 						responses.push({
 							'id': id,
 							'message': 'Http error occured.'
@@ -341,8 +341,8 @@
 				if (!(responseMessage instanceof Array)) {
 					responseMessage = [responseMessage];
 				}
-				for (id in this._objects) {
-					if (this._objects.hasOwnProperty(id)) {
+				for (id in batch._objects) {
+					if (batch._objects.hasOwnProperty(id)) {
 						var responseExists = false;
 						for (index in responseMessage) {
 							if (responseMessage.hasOwnProperty(index)) {
@@ -370,10 +370,10 @@
 
 		for (index in responses) {
 			if (responses.hasOwnProperty(index)) {
-				this._objects[responses[index].id].handleResponse(responseCode, responses[index]);
+				handleRequestResponse(batch._objects[responses[index].id], responseCode, responses[index]);
 			}
 		}
-	};
+	}
 
 
 	function JsonRPC(url, options) {
