@@ -47,7 +47,7 @@
 
 	/**
 	 * Add success callback to the request;
-	 * Callback will gets body of response
+	 * Callback will gets result-object from response
 	 *
 	 * @param callback
 	 *
@@ -68,7 +68,7 @@
 
 	/**
 	 * Add exception callback to the request;
-	 * Callback will gets object {code: errorCode, message: errorMessage, data: errorData}; field 'data' is optional;
+	 * Callback will gets error-object or string;
 	 *
 	 * @param callback
 	 *
@@ -89,7 +89,7 @@
 	};
 
 	/**
-	 * Add callback to the request, it will be called when response will be got (independently on success of request);
+	 * Add callback to the request, it will be called when response will be got (independently on result of request);
 	 * Callback doesn`t gets any parameters;
 	 *
 	 * @param callback
@@ -171,7 +171,7 @@
 	/**
 	 * Add request to the batch
 	 *
-	 * @var JsonRPCRequest requestObj
+	 * @param {JsonRPCRequest} requestObj
 	 *
 	 * @return JsonRPCBatch
 	 */
@@ -194,7 +194,7 @@
 	/**
 	 * Add several request to the batch simultaneously
 	 *
-	 * @var JsonRPCRequest[] requestsArr
+	 * @param {JsonRPCRequest[]} requestsArr
 	 *
 	 * @return JsonRPCBatch
 	 */
